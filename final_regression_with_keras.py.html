@@ -1,0 +1,259 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# # Final Assignment: Build a Regression Model in Keras
+
+# Imports:
+
+# In[62]:
+
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+
+
+# Let's download the data:
+
+# In[2]:
+
+
+concrete_data= pd.read_csv('https://cocl.us/concrete_data')
+concrete_data.head()
+
+
+# In[3]:
+
+
+concrete_data.shape
+
+
+# Let's split the data into the predictors columns and the target column:
+
+# In[14]:
+
+
+df_columns = concrete_data.columns
+predictors = concrete_data[df_columns[0:8]]
+target = concrete_data[df_columns[8]]
+
+
+# In[73]:
+
+
+predictors.head()
+
+
+# In[74]:
+
+
+target.head()
+
+
+# Let's normalize the data:
+
+# In[16]:
+
+
+n_cols = predictors_norm.shape[1]
+
+
+# Let's import Keras and the packages we need
+
+# In[17]:
+
+
+import keras
+from keras.models import Sequential
+from keras.layers import Dense
+
+
+# # Part A: Build a baseline model
+
+# Let's define a function that calls the regression model:
+
+# In[80]:
+
+
+def regression_model_1 ():
+    #create the model:
+    model = Sequential()
+    model.add(Dense(10,activation='relu',input_shape=(n_cols,)))
+    model.add(Dense(1))
+    
+    #compile model:
+    model.compile(optimizer='adam', loss='mean_squared_error')
+    
+    return model
+
+model_1 = regression_model_1()
+
+
+# Let's fit and evaluate the model:
+
+# In[81]:
+
+
+n=50
+MSE_1=[]
+num_epochs = 50
+for i in range(0,n):
+    #Split the data (30% left for test data)
+    X_train, X_test, y_train, y_test = train_test_split(predictors, target, test_size=0.3, random_state=None, shuffle=True)
+
+    #Fit the model with the train data:
+    model_1.fit(X_train, y_train, epochs=num_epochs, verbose=0)
+
+    #Predict using the test data:
+    y_test_hat = model_1.predict(X_test)
+    
+    #Calculate and add the MSE to the MSE list:
+    MSE_1.append(mean_squared_error(y_test, y_test_hat))
+
+# Calculate the mean and the standard deviation of the MSE's:
+MSE_mean = np.mean(MSE_1)
+MSE_std= np.std(MSE_1)
+
+print("A list of ", len(MSE_1), " mean square error values was created. The first 5 values are: ", MSE_1[0:5])
+print("The MSE mean is ", MSE_mean)
+print("The MSE standard deviation is ", MSE_std)
+
+
+# # Part B: Normalize the data
+
+# Let's normalize the predictors:
+
+# In[82]:
+
+
+predictors_norm = (predictors - predictors.mean()) / predictors.std()
+predictors_norm.head()
+
+
+# Let's fit and evaluate the same model, but this time using the normalized predictors:
+
+# In[83]:
+
+
+n=50
+MSE_2=[]
+num_epochs = 50
+for i in range(0,n):
+    #Split the data (30% left for test data)
+    X_train, X_test, y_train, y_test = train_test_split(predictors_norm, target, test_size=0.3, random_state=None, shuffle=True)
+
+    #Fit the model with the train data:
+    model_1.fit(X_train, y_train, epochs=num_epochs, verbose=0)
+
+    #Predict using the test data:
+    y_test_hat = model_1.predict(X_test)
+    
+    #Calculate and add the MSE to the MSE list:
+    MSE_2.append(mean_squared_error(y_test, y_test_hat))
+
+# Calculate the mean and the standard deviation of the MSE's:
+MSE_2_mean = np.mean(MSE_2)
+MSE_2_std= np.std(MSE_2)
+
+print("A list of ", len(MSE_2), " mean square error values was created. The first 5 values are: ", MSE_2[0:5])
+print("The MSE mean is ", MSE_2_mean)
+print("The MSE standard deviation is ", MSE_2_std)
+
+
+# ### How does the mean of the mean squared errors compare to that from Step A?
+
+# Answer: We achieved a much smaller MSE compared to step A when using the normalized data. Having the predictors normalized before fitting the model resulted in a better performing model. 
+
+# # Part C: Increase the number of epochs:
+
+# Let's fit and evaluate the same model, but this time using 100 epochs:
+
+# In[84]:
+
+
+n=50
+MSE_3=[]
+num_epochs = 100
+for i in range(0,n):
+    #Split the data (30% left for test data)
+    X_train, X_test, y_train, y_test = train_test_split(predictors_norm, target, test_size=0.3, random_state=None, shuffle=True)
+
+    #Fit the model with the train data:
+    model_1.fit(X_train, y_train, epochs=num_epochs, verbose=0)
+
+    #Predict using the test data:
+    y_test_hat = model_1.predict(X_test)
+    
+    #Calculate and add the MSE to the MSE list:
+    MSE_3.append(mean_squared_error(y_test, y_test_hat))
+
+# Calculate the mean and the standard deviation of the MSE's:
+MSE_3_mean = np.mean(MSE_3)
+MSE_3_std= np.std(MSE_3)
+
+print("A list of ", len(MSE_3), " mean square error values was created. The first 5 values are: ", MSE_3[0:5])
+print("The MSE mean is ", MSE_3_mean)
+print("The MSE standard deviation is ", MSE_3_std)
+
+
+# ### How does the mean of the mean squared errors compare to that from Step B?
+
+# Answer: Inceasing the number of epochs resulted in a smaller MSE compared to step B. Although the process took much longer, the MSE went from 65 to 36, which is a considerable improvement for our estimator.
+
+# # Part D: Increase the number of hidden layers
+
+# Let's change our model to 3 hidden layers:
+
+# In[85]:
+
+
+def regression_model_2 ():
+    #create the model:
+    model2 = Sequential()
+    model2.add(Dense(10,activation='relu',input_shape=(n_cols,)))
+    model2.add(Dense(10,activation='relu'))
+    model2.add(Dense(10,activation='relu'))
+    model2.add(Dense(1))
+    
+    #compile model:
+    model2.compile(optimizer='adam', loss='mean_squared_error')
+    
+    return model
+
+model_2 = regression_model_2()
+
+
+# Let's fit and evaluate the new model:
+
+# In[86]:
+
+
+n=50
+MSE_4=[]
+num_epochs = 50
+for i in range(0,n):
+    #Split the data (30% left for test data)
+    X_train, X_test, y_train, y_test = train_test_split(predictors_norm, target, test_size=0.3, random_state=None, shuffle=True)
+
+    #Fit the model with the train data:
+    model_2.fit(X_train, y_train, epochs=num_epochs, verbose=0)
+
+    #Predict using the test data:
+    y_test_hat = model_2.predict(X_test)
+    
+    #Calculate and add the MSE to the MSE list:
+    MSE_4.append(mean_squared_error(y_test, y_test_hat))
+
+# Calculate the mean and the standard deviation of the MSE's:
+MSE_4_mean = np.mean(MSE_4)
+MSE_4_std= np.std(MSE_4)
+
+print("A list of ", len(MSE_4), " mean square error values was created. The first 5 values are: ", MSE_4[0:5])
+print("The MSE mean is ", MSE_4_mean)
+print("The MSE standard deviation is ", MSE_4_std)
+
+
+# ### How does the mean of the mean squared errors compare to that from Step B?
+
+# Answer: Adding hidden layers to the network resulted in a smaller MSE compared to step B. We observed a better performance compare to increasing the number of epochs. The process is faster and the performance better.
